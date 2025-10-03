@@ -25,7 +25,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Only run Docker login and push for push events (merges to main).
+      # This enforces publishing images only when changes are merged to main.
       - name: Log in to Docker Hub
+        if: github.event_name == 'push'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USER }}
@@ -38,6 +41,7 @@ jobs:
           docker export $CONTAINER_ID | docker import - ${{ matrix.image }}:latest
 
       - name: Tag & push to Docker Hub
+        if: github.event_name == 'push'
         run: |
           docker tag ${{ matrix.image }}:latest ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
           docker push ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
