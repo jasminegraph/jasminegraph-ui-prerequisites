@@ -40,10 +40,15 @@ jobs:
           CONTAINER_ID=$(docker create ${{ matrix.image }}:temp)
           docker export $CONTAINER_ID | docker import - ${{ matrix.image }}:latest
 
+      - name: Get Timestamp
+        if: github.event_name != 'pull_request'
+        id: timestamp
+        run: echo "current=$(date +'%Y%m%dT%H%M%S')" >> "${GITHUB_OUTPUT}"
+
       - name: Tag & push to Docker Hub
         if: github.event_name == 'push'
         run: |
           docker tag ${{ matrix.image }}:latest ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
-          docker tag "${matrix.image}:latest" "${{secrets.DOCKER_USER}}/${matrix.image}:${{ steps.timestamp.outputs.current }}"
+          docker tag "${{matrix.image}}:latest" "${{secrets.DOCKER_USER}}/${{matrix.image}}:${{ steps.timestamp.outputs.current }}"
           docker push ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
-          docker push "${{secrets.DOCKER_USER}}/${matrix.image}:${{ steps.timestamp.outputs.current }}"
+          docker push "${{secrets.DOCKER_USER}}/${{matrix.image}}:${{ steps.timestamp.outputs.current }}"
