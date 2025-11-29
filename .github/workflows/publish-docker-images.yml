@@ -44,4 +44,6 @@ jobs:
         if: github.event_name == 'push'
         run: |
           docker tag ${{ matrix.image }}:latest ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
+          docker tag "${matrix.image}:latest" "${{secrets.DOCKER_USER}}/${matrix.image}:${{ steps.timestamp.outputs.current }}"
           docker push ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
+          docker push "${{secrets.DOCKER_USER}}/${matrix.image}:${{ steps.timestamp.outputs.current }}"
